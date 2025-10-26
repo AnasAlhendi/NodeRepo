@@ -20,7 +20,7 @@ const diagramNodes = [
     state: 'enabled',
     loc: '160 220',
     connections: [ { to: 'menu' } ],
-    openConfig: (id) => {}, openHelp: (id) => {}, openEdit: (id) => {}, onChangeCheckbox: (id, enabled) => {},
+    openConfig: (id) => {}, openHelp: (id) => {}, openEdit: (id) => {}
   },
   {
     id: 'menu',

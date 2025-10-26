@@ -521,6 +521,29 @@ class NodeUI {
             state: option.state || null,
             lineControlsEnabled: !!option.lineControlsEnabled
         };
+        // Wrap per-node open handlers to provide NodeUI context (same as onChangeNode)
+        try {
+            const list = Array.isArray(nodes) ? nodes : [];
+            const self = this;
+            list.forEach(n => {
+                if (!n || typeof n.id === 'undefined') return;
+                if (typeof n.openConfig === 'function' && !n._openConfigWrapped) {
+                    const orig = n.openConfig;
+                    n.openConfig = function(id) { return orig.call(self._contextFor(n), id ?? n.id); };
+                    n._openConfigWrapped = true;
+                }
+                if (typeof n.openEdit === 'function' && !n._openEditWrapped) {
+                    const orig = n.openEdit;
+                    n.openEdit = function(id) { return orig.call(self._contextFor(n), id ?? n.id); };
+                    n._openEditWrapped = true;
+                }
+                if (typeof n.openHelp === 'function' && !n._openHelpWrapped) {
+                    const orig = n.openHelp;
+                    n.openHelp = function(id) { return orig.call(self._contextFor(n), id ?? n.id); };
+                    n._openHelpWrapped = true;
+                }
+            });
+        } catch (e) { /* ignore wrapping errors */ }
         this._getRenderOptions = () => option.renderOptions || this.defaultRenderOptions(this._ctx.state, svg, inner, this._ctx.nodes);
         // Apply initialization nodeStates
         if (option && Array.isArray(option.nodeStates)) {

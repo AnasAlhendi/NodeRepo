@@ -229,14 +229,33 @@ body {
   opacity: 0.9;
 }
 .option-js .actions .mini-btn {
-  width: 14px;
-  height: 14px;
-  display: inline-block;
-  border: none;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 6px;
   background: transparent;
   color: inherit;
   cursor: pointer;
   padding: 0;
+  transition: transform 120ms ease, border-color 120ms ease;
+}
+/* Larger icon size inside mini buttons */
+.option-js .actions .mini-btn svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+/* Hover/focus with border and slight size increase */
+.option-js .actions .mini-btn:hover {
+  border-color: var(--blue-700);
+  transform: scale(1.10);
+}
+.option-js .actions .mini-btn:focus-visible {
+  border-color: var(--blue-600);
+  transform: scale(1.10);
+  outline: none;
 }
 
 /* Toggles */

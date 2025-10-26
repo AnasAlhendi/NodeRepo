@@ -138,7 +138,6 @@ class NodeRenderer {
         onOpenConfig,
         onOpenEdit,
         onOpenHelp,
-        onEnableChange,
         onCheckboxToggle,
         dragEnabled = false,
         onPositionChange,
@@ -177,7 +176,6 @@ class NodeRenderer {
                 ev.stopPropagation();
                 // Do not change internal node state here; delegate behavior to app via callback
                 if (typeof onCheckboxToggle === 'function') onCheckboxToggle(n.id, !!cb.checked, n);
-                if (typeof onEnableChange === 'function') onEnableChange(n.id, !!cb.checked);
             });
             enable.appendChild(cb);
             option.appendChild(enable);

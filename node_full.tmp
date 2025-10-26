@@ -639,16 +639,7 @@ class NodeUI {
         n.state = 'disabled';
         this._removeBypassFor(id);
         this._saveOriginalEdges(id);
-        // Determine which outgoing targets to bypass to. For conditional nodes,
-        // when unchecked/disabled we prefer only the edge labeled No.
-        // Fallback to all outgoing edges when no label is available.
-        let outs = this._outgoingOf(id);
-        if (Array.isArray(n.connections)) {
-            const noEdges = n.connections.filter(c => c && typeof c.text === 'string' && c.text.trim().toLowerCase() === 'no');
-            if (noEdges.length > 0) {
-                outs = Array.from(new Set(noEdges.map(c => c.to)));
-            }
-        }
+        const outs = this._outgoingOf(id);
         const ins = this._incomingOf(id);
         if (opts.detach) {
             n.connections = [];
@@ -831,3 +822,4 @@ class NodeUI {
         };
     }
 }
+

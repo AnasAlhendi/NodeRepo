@@ -597,15 +597,46 @@ class NodeUI {
         if (n) {
             n.connections = JSON.parse(JSON.stringify(snap.out));
         }
-        const list = this._ctx ? this._ctx.nodes : [];
         const agent = this;
+        // Restore incoming edges only from enabled sources; keep the rest pending.
+        const pending = new Map();
         snap.incoming.forEach((l, srcId) => {
             const src = agent._getNodeById(srcId);
-            if (!src) return;
+            if (!src || src.state === 'disabled') {
+                pending.set(srcId, l);
+                return;
+            }
             src.connections = (src.connections || []).filter(c => c && c.to !== id);
             l.forEach(c => { src.connections.push(JSON.parse(JSON.stringify(c))); });
         });
-        this._orig.delete(id);
+        if (pending.size > 0) {
+            // Keep snapshot with remaining pending incoming edges
+            this._orig.set(id, { out: JSON.parse(JSON.stringify(n ? n.connections : snap.out)), incoming: pending });
+        } else {
+            this._orig.delete(id);
+        }
+    }
+
+    _restorePendingIncomingFrom(srcId) {
+        // If any disabled targets had recorded original incoming edges from srcId,
+        // restore them now that srcId is enabled.
+        const agent = this;
+        const entries = Array.from(this._orig.entries());
+        entries.forEach(([targetId, snap]) => {
+            if (!snap || !snap.incoming || !snap.incoming.has(srcId)) return;
+            const src = agent._getNodeById(srcId);
+            if (!src || src.state === 'disabled') return;
+            const links = snap.incoming.get(srcId) || [];
+            // Remove any existing edges from src to target to avoid duplicates
+            src.connections = (src.connections || []).filter(c => !(c && c.to === targetId));
+            links.forEach(c => { src.connections.push(JSON.parse(JSON.stringify(c))); });
+            snap.incoming.delete(srcId);
+            if (snap.incoming.size === 0) {
+                agent._orig.delete(targetId);
+            } else {
+                agent._orig.set(targetId, snap);
+            }
+        });
     }
 
     _removeBypassFor(id) {
@@ -646,6 +677,9 @@ class NodeUI {
         n.state = 'enabled';
         this._removeBypassFor(id);
         this._restoreOriginalEdges(id);
+        // Now that this node is enabled, restore any pending incoming edges
+        // for other nodes that were waiting on this source.
+        this._restorePendingIncomingFrom(id);
         this._setDisabledClass(id, false, true);
     }
 
